@@ -1,5 +1,6 @@
 const express = require("express");
 const Product = require("../../models/Product");
+const calculateCalories = require("../../utils/calculateCalories");
 const {
   validateAuth,
   authorizeRoles,
@@ -31,6 +32,31 @@ router.post("/", validateAuth, authorizeRoles("admin"), async (req, res) => {
     res.status(201).json(newProduct);
   } catch (err) {
     res.status(400).json({ message: err.message });
+  }
+});
+
+//! Endpoint public pentru aportul zilnic de kcal și lista de produse nerecomandate
+router.get("/daily-intake", async (req, res) => {
+  try {
+    const { weight, height, age, groupBloodNotAllowed } = req.query;
+
+    const dailyKcal = calculateCalories(weight, height, age);
+    if (dailyKcal === null) {
+      return res
+        .status(400)
+        .json({ message: "Please provide valid weight, height, and age" });
+    }
+
+    const products = await Product.find({
+      groupBloodNotAllowed: groupBloodNotAllowed === "true",
+    });
+
+    res.json({
+      dailyKcal,
+      notRecommendedProducts: products,
+    });
+  } catch (err) {
+    res.status(500).json({ message: err.message });
   }
 });
 
