@@ -50,4 +50,10 @@ router.post("/login", async (req, res) => {
   }
 });
 
+//! Endpoint pentru deconectare
+router.post("/logout", (req, res) => {
+  // TODO Pe partea clientului, token-ul ar trebui eliminat (de ex. din localStorage)
+  res.json({ message: "User logged out successfully" });
+});
+
 module.exports = router;
