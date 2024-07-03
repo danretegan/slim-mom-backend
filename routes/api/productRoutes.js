@@ -173,4 +173,45 @@ router.delete("/consumed/:id", validateAuth, async (req, res) => {
   }
 });
 
+//! Endpoint privat pentru a primi toate informațiile despre o anumită zi
+router.get("/day-info", validateAuth, async (req, res) => {
+  try {
+    const { date } = req.query;
+    const userId = req.user._id;
+
+    // Verificăm dacă data este furnizată
+    if (!date) {
+      return res.status(400).json({ message: "Date is required" });
+    }
+
+    // Convertim data la formatul corect
+    const startDate = new Date(date);
+    startDate.setHours(0, 0, 0, 0);
+    const endDate = new Date(date);
+    endDate.setHours(23, 59, 59, 999);
+
+    // Găsim toate produsele consumate în acea zi de către utilizator
+    const consumedProducts = await ConsumedProduct.find({
+      userId,
+      date: { $gte: startDate, $lte: endDate },
+    }).populate("productId");
+
+    // Calculăm totalul caloriilor consumate
+    let totalCalories = 0;
+    consumedProducts.forEach((consumedProduct) => {
+      const productCaloriesPerGram =
+        consumedProduct.productId.calories / consumedProduct.productId.weight;
+      totalCalories += productCaloriesPerGram * consumedProduct.quantity;
+    });
+
+    res.json({
+      date: startDate,
+      totalCalories,
+      consumedProducts,
+    });
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+});
+
 module.exports = router;
