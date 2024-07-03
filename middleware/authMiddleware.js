@@ -15,4 +15,18 @@ function validateAuth(req, res, next) {
   })(req, res, next);
 }
 
-module.exports = { validateAuth };
+function authorizeRoles(...roles) {
+  return (req, res, next) => {
+    if (!roles.includes(req.user.role)) {
+      return res.status(403).json({
+        status: "error",
+        code: 403,
+        message: "Forbidden",
+        data: "Forbidden",
+      });
+    }
+    next();
+  };
+}
+
+module.exports = { validateAuth, authorizeRoles };
