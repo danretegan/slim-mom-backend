@@ -1,5 +1,6 @@
 const express = require("express");
 const Product = require("../../models/Product");
+const ConsumedProduct = require("../../models/ConsumedProduct");
 const DailyIntake = require("../../models/DailyIntake");
 const calculateCalories = require("../../utils/calculateCalories");
 const {
@@ -117,6 +118,33 @@ router.get("/search", async (req, res) => {
     });
 
     res.json(products);
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+});
+
+//! Endpoint privat pentru a adăuga un produs consumat într-o anumită zi
+router.post("/consumed", validateAuth, async (req, res) => {
+  try {
+    const { productId, date, quantity } = req.body;
+    const userId = req.user._id;
+
+    // Verificăm dacă produsul există
+    const product = await Product.findById(productId);
+    if (!product) {
+      return res.status(404).json({ message: "Product not found" });
+    }
+
+    const consumedProduct = new ConsumedProduct({
+      userId,
+      productId,
+      date: new Date(date),
+      quantity,
+    });
+
+    await consumedProduct.save();
+
+    res.status(201).json(consumedProduct);
   } catch (err) {
     res.status(500).json({ message: err.message });
   }
