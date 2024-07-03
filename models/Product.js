@@ -1,17 +1,49 @@
-// models/Product.js
-
 const mongoose = require("mongoose");
 
+// {
+//   "_id": {
+//     "$oid": "5d51694802b2373622ff5543"
+//   },
+//   "categories": "cereals",
+//   "weight": 100,
+//   "title": "Amaranth",
+//   "calories": 371,
+//   "groupBloodNotAllowed": [
+//     null,
+//     true,
+//     false,
+//     false,
+//     false
+//   ],
+//   "__v": 0
+// }
+
 const productSchema = new mongoose.Schema({
-  name: {
+  categories: {
     type: String,
     required: true,
+    trim: true,
+  },
+  weight: {
+    type: Number,
+    required: true,
+    min: 0,
+  },
+  title: {
+    type: String,
+    required: true,
+    trim: true,
   },
   calories: {
     type: Number,
     required: true,
+    min: 0,
   },
-  // Adaugă alte câmpuri relevante pentru produsele tale
+  groupBloodNotAllowed: {
+    type: [Boolean],
+    required: true,
+    default: [],
+  },
 });
 
 const Product = mongoose.model("Product", productSchema);
