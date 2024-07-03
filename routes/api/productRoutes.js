@@ -100,4 +100,26 @@ router.post("/daily-intake", validateAuth, async (req, res) => {
   }
 });
 
+//! Endpoint pentru căutarea produselor
+router.get("/search", async (req, res) => {
+  try {
+    const { query } = req.query;
+    if (!query) {
+      return res.status(400).json({ message: "Query string is required" });
+    }
+
+    // Căutare produse pe baza titlului sau categoriilor
+    const products = await Product.find({
+      $or: [
+        { title: { $regex: query, $options: "i" } },
+        { categories: { $regex: query, $options: "i" } },
+      ],
+    });
+
+    res.json(products);
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+});
+
 module.exports = router;
