@@ -150,4 +150,27 @@ router.post("/consumed", validateAuth, async (req, res) => {
   }
 });
 
+//! Endpoint privat pentru a șterge un produs consumat într-o anumită zi
+router.delete("/consumed/:id", validateAuth, async (req, res) => {
+  try {
+    const consumedProductId = req.params.id;
+    const userId = req.user._id;
+
+    // Verificăm dacă înregistrarea produsului consumat există și aparține utilizatorului
+    const consumedProduct = await ConsumedProduct.findOne({
+      _id: consumedProductId,
+      userId,
+    });
+    if (!consumedProduct) {
+      return res.status(404).json({ message: "Consumed product not found" });
+    }
+
+    await ConsumedProduct.deleteOne({ _id: consumedProductId });
+
+    res.status(200).json({ message: "Consumed product deleted successfully" });
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+});
+
 module.exports = router;
