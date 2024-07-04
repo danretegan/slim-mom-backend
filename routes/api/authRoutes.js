@@ -19,7 +19,17 @@ router.post("/register", async (req, res) => {
     const newUser = new User({ name, email, password: hashedPassword, role });
     await newUser.save();
 
-    res.status(201).json({ message: "User registered successfully" });
+    const token = jwt.sign(
+      { userId: newUser._id, role: newUser.role },
+      process.env.JWT_SECRET,
+      { expiresIn: "24h" }
+    );
+
+    res.cookie("token", token, { httpOnly: true, sameSite: "strict" });
+    res.status(201).json({
+      token,
+      user: { name: newUser.name, email: newUser.email, role: newUser.role },
+    });
   } catch (err) {
     res.status(500).json({ message: err.message });
   }
@@ -43,12 +53,14 @@ router.post("/login", async (req, res) => {
     const token = jwt.sign(
       { userId: user._id, role: user.role },
       process.env.JWT_SECRET,
-      {
-        expiresIn: "24h",
-      }
+      { expiresIn: "24h" }
     );
 
-    res.json({ token });
+    res.cookie("token", token, { httpOnly: true, sameSite: "strict" });
+    res.json({
+      token,
+      user: { name: user.name, email: user.email, role: user.role },
+    });
   } catch (err) {
     res.status(500).json({ message: err.message });
   }
@@ -57,6 +69,7 @@ router.post("/login", async (req, res) => {
 //! Endpoint pentru deconectare
 router.post("/logout", (req, res) => {
   // TODO Pe partea clientului, token-ul ar trebui eliminat (de ex. din localStorage)
+  res.clearCookie("token");
   res.json({ message: "User logged out successfully" });
 });
 
