@@ -1,32 +1,28 @@
-const passport = require("passport");
+// src/middleware/authMiddleware.js
+const jwt = require("jsonwebtoken");
 
-function validateAuth(req, res, next) {
-  passport.authenticate("jwt", { session: false }, (err, user) => {
-    if (err || !user) {
-      return res.status(401).json({
-        status: "error",
-        code: 401,
-        message: "Unauthorized",
-        data: "Unauthorized",
-      });
-    }
-    req.user = user;
+const validateAuth = (req, res, next) => {
+  const token = req.headers.authorization?.split(" ")[1];
+  if (!token) {
+    return res.status(401).json({ message: "Access denied" });
+  }
+
+  try {
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    req.user = decoded;
     next();
-  })(req, res, next);
-}
+  } catch (err) {
+    res.status(401).json({ message: "Invalid token" });
+  }
+};
 
-function authorizeRoles(...roles) {
-  return (req, res, next) => {
+const authorizeRoles =
+  (...roles) =>
+  (req, res, next) => {
     if (!roles.includes(req.user.role)) {
-      return res.status(403).json({
-        status: "error",
-        code: 403,
-        message: "Forbidden",
-        data: "Forbidden",
-      });
+      return res.status(403).json({ message: "Forbidden" });
     }
     next();
   };
-}
 
 module.exports = { validateAuth, authorizeRoles };

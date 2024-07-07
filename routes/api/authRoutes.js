@@ -4,6 +4,7 @@ const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 const router = express.Router();
 require("dotenv").config();
+const { validateAuth } = require("../../middleware/authMiddleware");
 
 //! Endpoint pentru înregistrare
 router.post("/register", async (req, res) => {
@@ -71,6 +72,38 @@ router.post("/logout", (req, res) => {
   // TODO Pe partea clientului, token-ul ar trebui eliminat (de ex. din localStorage)
   res.clearCookie("token");
   res.json({ message: "User logged out successfully" });
+});
+
+//! Endpoint pentru actualizarea profilului
+router.post("/update-profile", validateAuth, async (req, res) => {
+  try {
+    const userId = req.user._id;
+    const {
+      height,
+      age,
+      currentWeight,
+      desireWeight,
+      bloodType,
+      dailyCalorieIntake,
+    } = req.body;
+
+    const updatedUser = await User.findByIdAndUpdate(
+      userId,
+      {
+        height,
+        age,
+        currentWeight,
+        desireWeight,
+        bloodType,
+        dailyCalorieIntake,
+      },
+      { new: true }
+    );
+
+    res.json({ user: updatedUser });
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
 });
 
 module.exports = router;
