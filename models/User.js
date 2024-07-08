@@ -22,30 +22,6 @@ const userSchema = new mongoose.Schema({
     enum: ["user", "admin"], //! Adăugăm roluri posibile
     default: "user",
   },
-  height: {
-    type: Number,
-    default: null,
-  },
-  age: {
-    type: Number,
-    default: null,
-  },
-  currentWeight: {
-    type: Number,
-    default: null,
-  },
-  desireWeight: {
-    type: Number,
-    default: null,
-  },
-  bloodType: {
-    type: String,
-    default: null,
-  },
-  dailyCalorieIntake: {
-    type: Number,
-    default: null,
-  },
 });
 
 userSchema.methods.setPassword = function (password) {
