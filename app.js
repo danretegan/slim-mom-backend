@@ -1,3 +1,4 @@
+// app.js
 const express = require("express");
 const logger = require("morgan");
 const cors = require("cors");
@@ -5,6 +6,7 @@ const passport = require("./passport");
 const connectToDb = require("./utils/connectToDb");
 const authRouter = require("./routes/api/authRoutes");
 const productsRouter = require("./routes/api/productRoutes");
+const calorieInfoRoutes = require("./routes/api/calorieInfoRoutes");
 const { swaggerUi, specs } = require("./swagger");
 
 const app = express();
@@ -21,6 +23,7 @@ app.use(passport.initialize());
 
 app.use("/api/auth", authRouter);
 app.use("/api/products", productsRouter);
+app.use("/api", calorieInfoRoutes);
 
 // Swagger endpoint
 app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(specs));

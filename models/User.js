@@ -1,3 +1,4 @@
+// models/User.js
 const mongoose = require("mongoose");
 const bcrypt = require("bcryptjs");
 
@@ -21,6 +22,15 @@ const userSchema = new mongoose.Schema({
     type: String,
     enum: ["user", "admin"], //! Adăugăm roluri posibile
     default: "user",
+  },
+  calorieInfo: {
+    height: Number,
+    age: Number,
+    currentWeight: Number,
+    desireWeight: Number,
+    bloodType: Number,
+    dailyRate: Number,
+    notRecommendedFoods: [String],
   },
 });
 
