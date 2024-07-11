@@ -9,7 +9,7 @@ const {
 } = require("../../middleware/authMiddleware");
 const router = express.Router();
 
-
+//! Get all products:
 router.get("/", async (req, res) => {
   try {
     const products = await Product.find();
@@ -19,6 +19,7 @@ router.get("/", async (req, res) => {
   }
 });
 
+//! Create a new product (admin only):
 router.post("/", validateAuth, authorizeRoles("admin"), async (req, res) => {
   const product = new Product({
     categories: req.body.categories,
@@ -36,6 +37,7 @@ router.post("/", validateAuth, authorizeRoles("admin"), async (req, res) => {
   }
 });
 
+//! Get daily intake and not recommended products:
 router.get("/daily-intake", async (req, res) => {
   try {
     const { weight, height, age, groupBloodNotAllowed } = req.query;
@@ -60,6 +62,7 @@ router.get("/daily-intake", async (req, res) => {
   }
 });
 
+//! Save daily intake info for authenticated user:
 router.post("/daily-intake", validateAuth, async (req, res) => {
   try {
     const { weight, height, age, groupBloodNotAllowed } = req.body;
@@ -98,7 +101,7 @@ router.post("/daily-intake", validateAuth, async (req, res) => {
   }
 });
 
-//! Endpoint pentru căutarea produselor:
+//! Search products:
 router.get("/search", async (req, res) => {
   try {
     const { query, bloodType } = req.query;
@@ -112,7 +115,7 @@ router.get("/search", async (req, res) => {
 
     const bloodTypeIndex = parseInt(bloodType, 10);
 
-    //* Căutare produse pe baza titlului sau categoriilor și excluderea celor nerecomandate:
+      //* Căutare produse pe baza titlului sau categoriilor și excluderea celor nerecomandate:
     const products = await Product.find({
       $and: [
         {
@@ -133,12 +136,13 @@ router.get("/search", async (req, res) => {
   }
 });
 
+//! Add consumed product:
 router.post("/consumed", validateAuth, async (req, res) => {
   try {
     const { productId, date, quantity } = req.body;
     const userId = req.user._id;
 
-    // Verificăm dacă produsul există
+    //* Verificăm dacă produsul există:
     const product = await Product.findById(productId);
     if (!product) {
       return res.status(404).json({ message: "Product not found" });
@@ -159,12 +163,13 @@ router.post("/consumed", validateAuth, async (req, res) => {
   }
 });
 
+//! Delete consumed product:
 router.delete("/consumed/:id", validateAuth, async (req, res) => {
   try {
     const consumedProductId = req.params.id;
     const userId = req.user._id;
 
-    // Verificăm dacă înregistrarea produsului consumat există și aparține utilizatorului
+      //* Verificăm dacă înregistrarea produsului consumat există și aparține utilizatorului:
     const consumedProduct = await ConsumedProduct.findOne({
       _id: consumedProductId,
       userId,
@@ -181,30 +186,30 @@ router.delete("/consumed/:id", validateAuth, async (req, res) => {
   }
 });
 
-
+//! Get day info:
 router.get("/day-info", validateAuth, async (req, res) => {
   try {
     const { date } = req.query;
     const userId = req.user._id;
 
-    // Verificăm dacă data este furnizată
+     //* Verificăm dacă data este furnizată:
     if (!date) {
       return res.status(400).json({ message: "Date is required" });
     }
 
-    // Convertim data la formatul corect
+    //* Convertim data la formatul corect:
     const startDate = new Date(date);
     startDate.setHours(0, 0, 0, 0);
     const endDate = new Date(date);
     endDate.setHours(23, 59, 59, 999);
 
-    // Găsim toate produsele consumate în acea zi de către utilizator
+     //* Găsim toate produsele consumate în acea zi de către utilizator:
     const consumedProducts = await ConsumedProduct.find({
       userId,
       date: { $gte: startDate, $lte: endDate },
     }).populate("productId");
 
-    // Calculăm totalul caloriilor consumate
+    //* Calculăm totalul caloriilor consumate:
     let totalCalories = 0;
     consumedProducts.forEach((consumedProduct) => {
       const productCaloriesPerGram =
