@@ -125,7 +125,7 @@ router.get("/search", async (req, res) => {
           ],
         },
         {
-          [`groupBloodNotAllowed.${bloodTypeIndex}`]: { $ne: false },
+          [`groupBloodNotAllowed.${bloodTypeIndex}`]: { $ne: true },
         },
       ],
     });
