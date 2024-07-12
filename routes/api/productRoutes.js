@@ -40,7 +40,7 @@ router.post("/", validateAuth, authorizeRoles("admin"), async (req, res) => {
 //! Get daily intake and not recommended products:
 router.get("/daily-intake", async (req, res) => {
   try {
-    const { weight, height, age, groupBloodNotAllowed } = req.query;
+    const { weight, height, age, bloodType } = req.query;
 
     const dailyKcal = calculateCalories(weight, height, age);
     if (dailyKcal === null) {
@@ -49,8 +49,9 @@ router.get("/daily-intake", async (req, res) => {
         .json({ message: "Please provide valid weight, height, and age" });
     }
 
+    const bloodTypeIndex = parseInt(bloodType, 10);
     const products = await Product.find({
-      groupBloodNotAllowed: groupBloodNotAllowed === "true",
+      [`groupBloodNotAllowed.${bloodTypeIndex}`]: true,
     });
 
     res.json({
@@ -65,7 +66,7 @@ router.get("/daily-intake", async (req, res) => {
 //! Save daily intake info for authenticated user:
 router.post("/daily-intake", validateAuth, async (req, res) => {
   try {
-    const { weight, height, age, groupBloodNotAllowed } = req.body;
+    const { weight, height, age, bloodType } = req.body;
     const userId = req.user._id;
 
     const dailyKcal = calculateCalories(weight, height, age);
@@ -75,8 +76,9 @@ router.post("/daily-intake", validateAuth, async (req, res) => {
         .json({ message: "Please provide valid weight, height, and age" });
     }
 
+    const bloodTypeIndex = parseInt(bloodType, 10);
     const products = await Product.find({
-      groupBloodNotAllowed: groupBloodNotAllowed === "true",
+      [`groupBloodNotAllowed.${bloodTypeIndex}`]: true,
     });
 
     const notRecommendedProducts = products.map((product) => product.title);
@@ -125,7 +127,7 @@ router.get("/search", async (req, res) => {
           ],
         },
         {
-          [`groupBloodNotAllowed.${bloodTypeIndex}`]: { $ne: true },
+          [`groupBloodNotAllowed.${bloodTypeIndex}`]: false,
         },
       ],
     });
