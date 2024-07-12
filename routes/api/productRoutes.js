@@ -115,7 +115,7 @@ router.get("/search", async (req, res) => {
 
     const bloodTypeIndex = parseInt(bloodType, 10);
 
-      //* Căutare produse pe baza titlului sau categoriilor și excluderea celor nerecomandate:
+    //* Căutare produse pe baza titlului sau categoriilor și excluderea celor nerecomandate:
     const products = await Product.find({
       $and: [
         {
@@ -125,7 +125,7 @@ router.get("/search", async (req, res) => {
           ],
         },
         {
-          [`groupBloodNotAllowed.${bloodTypeIndex}`]: { $ne: true },
+          [`groupBloodNotAllowed.${bloodTypeIndex}`]: { $ne: false },
         },
       ],
     });
@@ -169,7 +169,7 @@ router.delete("/consumed/:id", validateAuth, async (req, res) => {
     const consumedProductId = req.params.id;
     const userId = req.user._id;
 
-      //* Verificăm dacă înregistrarea produsului consumat există și aparține utilizatorului:
+    //* Verificăm dacă înregistrarea produsului consumat există și aparține utilizatorului:
     const consumedProduct = await ConsumedProduct.findOne({
       _id: consumedProductId,
       userId,
@@ -192,7 +192,7 @@ router.get("/day-info", validateAuth, async (req, res) => {
     const { date } = req.query;
     const userId = req.user._id;
 
-     //* Verificăm dacă data este furnizată:
+    //* Verificăm dacă data este furnizată:
     if (!date) {
       return res.status(400).json({ message: "Date is required" });
     }
@@ -203,7 +203,7 @@ router.get("/day-info", validateAuth, async (req, res) => {
     const endDate = new Date(date);
     endDate.setHours(23, 59, 59, 999);
 
-     //* Găsim toate produsele consumate în acea zi de către utilizator:
+    //* Găsim toate produsele consumate în acea zi de către utilizator:
     const consumedProducts = await ConsumedProduct.find({
       userId,
       date: { $gte: startDate, $lte: endDate },
