@@ -1,6 +1,5 @@
 ## GoIT Node.js Course Template
 
-
 ### Comenzi:
 
 - `npm start` &mdash; pornește serverul în modul production.
